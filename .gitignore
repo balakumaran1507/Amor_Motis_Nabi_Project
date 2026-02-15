@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+ctf_venv/
+venv/
+env/
+ENV/
+
+# Generated Files (can be regenerated from scripts)
+personalized_cards/
+wrapped_pages/
+
+# Sensitive Data (contains player emails)
+player_data.csv
+**/users*.csv
+**/submissions*.csv
+**/scoreboard*.csv
+
+# Test Data
+test_data.csv
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
