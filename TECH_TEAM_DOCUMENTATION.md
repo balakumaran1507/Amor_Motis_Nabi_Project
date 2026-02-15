@@ -1,7 +1,7 @@
 # CTF WRAPPED - COMPLETE TECHNICAL DOCUMENTATION
 ## Post-Event Personalized Results System
 
-**Project:** Valentine's Day CTF 2025 - Wrapped Experience  
+**Project:** Valentine's Day CTF 2026 - Wrapped Experience  
 **Deadline:** Feb 17, 2026 10:00 AM Launch  
 **Players:** ~90-100  
 **Tech Stack:** Python, Google Sheets, Netlify, HTML/CSS, Google Apps Script  
@@ -187,7 +187,7 @@ Rank,Username,Score,First_Bloods
 
 #### **PROCESSING: Google Sheets Formulas**
 
-**Google Sheet:** "CTF Wrapped 2025 Master"
+**Google Sheet:** "CTF Wrapped 2026 Master"
 
 **Tabs:**
 1. `challenges` - Manual fill before CTF
@@ -396,7 +396,7 @@ ctf_wrapped/
 **Owner:** Non-technical co-founder (with your help if needed)
 
 **Steps:**
-1. Open Google Sheets: "CTF Wrapped 2025 Master"
+1. Open Google Sheets: "CTF Wrapped 2026 Master"
 2. Go to `users` tab → Paste users.csv data
 3. Go to `submissions` tab → Paste submissions.csv data
 4. Go to `scoreboard` tab → Paste scoreboard.csv data
@@ -601,7 +601,7 @@ CTF WRAPPED HTML GENERATOR
 
 **Steps:**
 
-1. Open Google Sheets: "CTF Wrapped 2025 Master"
+1. Open Google Sheets: "CTF Wrapped 2026 Master"
 2. Click **Extensions → Apps Script**
 3. Delete any existing code
 4. Paste the email script (see Code section below)

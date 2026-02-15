@@ -35,7 +35,7 @@ html = f'''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBERCOM CTF Wrapped 2025 - All Operatives</title>
+    <title>CYBERCOM CTF Wrapped 2026 - All Operatives</title>
     <link rel="stylesheet" href="globals.css">
     <style>
         .player-grid {{
@@ -120,7 +120,7 @@ html = f'''<!DOCTYPE html>
         <header style="text-align: center; margin-bottom: 80px;">
             <div class="mono-tag" style="margin-bottom: 20px;">► OPERATIVE_DATABASE_V1.0</div>
             <h1 class="header-display" style="font-size: 5rem;">CYBERCOM</h1>
-            <p class="mono-tag">CTF WRAPPED // AMOR MORTIS // 2025</p>
+            <p class="mono-tag">CTF WRAPPED // AMOR MORTIS // 2026</p>
         </header>
 
         <div class="search-container">

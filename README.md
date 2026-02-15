@@ -1,4 +1,4 @@
-# 🎉 CTF Wrapped - Amor Mortis Valentine's Day CTF 2025
+# 🎉 CTF Wrapped - Amor Mortis Valentine's Day CTF 2026
 
 **"Spotify Wrapped" style personalized results system for CTF competitions**
 
@@ -18,7 +18,7 @@ A complete automated system to create personalized "wrapped" experiences for CTF
 - 🌐 **Personal webpage** with shareable results
 - 📱 **Social media integration** (Twitter, LinkedIn, Facebook)
 
-**Built for:** CYBERCOM's Valentine's Day CTF 2025 "Amor Mortis"
+**Built for:** CYBERCOM's Valentine's Day CTF 2026 "Amor Mortis"
 **Players:** 163 participants
 **Archetypes:** 7 unique personality types based on solving behavior
 
@@ -317,7 +317,7 @@ bob,bob@email.com,The Heartbreaker,3,22,18,4h 23m,Web,
 
 ## 📈 Results
 
-**CYBERCOM Valentine's CTF 2025:**
+**CYBERCOM Valentine's CTF 2026:**
 - ✅ **163 players** received personalized wrapped
 - ✅ **5 archetypes** represented
 - ✅ **17MB** total deployment size
@@ -366,7 +366,7 @@ MIT License - Feel free to use for your own CTF events!
 ## 🙏 Acknowledgments
 
 **Created by:** CYBERCOM Team
-**Event:** Valentine's Day CTF 2025 - "Amor Mortis"
+**Event:** Valentine's Day CTF 2026 - "Amor Mortis"
 **Inspired by:** Spotify Wrapped
 **Tech Stack:** Python, Pillow, Pandas, Netlify, Google Apps Script
 
