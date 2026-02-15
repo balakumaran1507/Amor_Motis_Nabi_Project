@@ -17,7 +17,7 @@ from PIL import Image, ImageDraw, ImageFont
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 CSV_FILE = os.path.join(BASE_PATH, "player_data.csv")
-TEMPLATE_BG = os.path.join(BASE_PATH, "card_bg.png")
+TEMPLATE_BG = os.path.join(BASE_PATH, "chibis", "card bg.png")
 CHIBI_FOLDER = os.path.join(BASE_PATH, "chibis")
 OUTPUT_FOLDER = os.path.join(BASE_PATH, "personalized_cards")
 
@@ -33,11 +33,11 @@ if not os.path.exists(FONT_PATH):
 CHIBI_MAP = {
     "The Hopeless Romantic": "chibi_hopeless_romantic.png",
     "The Player": "chibi_player.png",
-    "The Committed One": "chibi_committed_one.png",
+    "The Committed One": "chibi_commited _one.png",
     "The Heartbreaker": "chibi_heartbreaker.png",
     "The Overthinker": "chibi_overthinker.png",
-    "The Chaotic Lover": "chibi_chaotic_lover.png",
-    "The Slow Burn": "chibi_slow_burn.png"
+    "The Chaotic Lover": "chibi_chaoticlover.png",
+    "The Slow Burn": "chibi_slowburn.png"
 }
 
 # ============================================
@@ -57,8 +57,11 @@ STATS_X = 185
 STATS_FONT_SIZE = 42
 STATS_COLOR = (176, 176, 176) # Secondary text color
 
-# Background color to hide placeholders
+# Colors from Infra theme
 BG_COLOR = (10, 10, 10) # Dark theme background
+ACCENT_COLOR = (255, 107, 53) # Cyber Orange
+SECONDARY_COLOR = (176, 176, 176) # Secondary text
+WHITE = (255, 255, 255)
 
 # ============================================
 # HELPER FUNCTIONS
@@ -93,14 +96,23 @@ def personalize_card(player_data, template_path, chibi_folder, output_folder):
     draw = ImageDraw.Draw(card)
 
     # 1. Clear placeholders (Draw rectangles over existing text areas)
+    # Clear "2025" area specifically
+    draw.rectangle([400, 95, 680, 125], fill=BG_COLOR)
     # Archetype area
-    draw.rectangle([200, 240, 880, 310], fill=BG_COLOR)
+    draw.rectangle([200, 150, 880, 320], fill=BG_COLOR)
     # Chibi area
-    draw.rectangle([320, 420, 680, 810], fill=BG_COLOR)
+    draw.rectangle([330, 430, 670, 800], fill=BG_COLOR)
     # Stats area
-    draw.rectangle([180, 1140, 600, 1450], fill=BG_COLOR)
+    draw.rectangle([180, 1020, 650, 1450], fill=BG_COLOR)
 
-    # 2. Paste chibi character
+    # 2. Add technical "2026" text
+    try:
+        small_mono = ImageFont.truetype(FONT_PATH, 24)
+    except:
+        small_mono = ImageFont.load_default()
+    add_text_centered(draw, "CTF WRAPPED 2026", (540, 110), small_mono, ACCENT_COLOR)
+
+    # 3. Paste chibi character
     chibi_filename = CHIBI_MAP.get(archetype)
     if chibi_filename:
         chibi_path = os.path.join(chibi_folder, chibi_filename)
@@ -113,24 +125,29 @@ def personalize_card(player_data, template_path, chibi_folder, output_folder):
         else:
             print(f"  ⚠️  Chibi not found: {chibi_path}")
     
-    # 3. Add text
+    # 4. Add text
     try:
         title_font = ImageFont.truetype(FONT_PATH, TITLE_FONT_SIZE)
         stats_font = ImageFont.truetype(FONT_PATH, STATS_FONT_SIZE)
+        header_font = ImageFont.truetype(FONT_PATH, 32)
     except:
         title_font = ImageFont.load_default()
         stats_font = ImageFont.load_default()
+        header_font = ImageFont.load_default()
     
-    add_text_centered(draw, archetype.upper(), TITLE_POSITION, title_font, TITLE_COLOR)
+    add_text_centered(draw, archetype.upper(), TITLE_POSITION, title_font, WHITE)
     
+    # Redraw "COMBAT STATISTICS" header to make it clean
+    add_text_left(draw, "► COMBAT STATISTICS", (STATS_X, STATS_START_Y - 80), header_font, ACCENT_COLOR)
+
     stats_y = STATS_START_Y
-    add_text_left(draw, f"► SOLVED: {solved}/{total}", (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► SOLVED: {solved}/{total}", (STATS_X, stats_y), stats_font, WHITE)
     stats_y += STATS_LINE_HEIGHT
-    add_text_left(draw, f"► RANK: #{rank}", (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► RANK: #{rank}", (STATS_X, stats_y), stats_font, WHITE)
     stats_y += STATS_LINE_HEIGHT
-    add_text_left(draw, f"► TIME: {time_display}", (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► TIME: {time_display}", (STATS_X, stats_y), stats_font, WHITE)
     stats_y += STATS_LINE_HEIGHT
-    add_text_left(draw, f"► FAVORITE: {category}", (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► FAVORITE: {category}", (STATS_X, stats_y), stats_font, WHITE)
     
     card = card.convert('RGB')
     output_path = os.path.join(output_folder, f"{username}_card.png")
