@@ -16,7 +16,7 @@ ENV/
 
 # Generated Files (can be regenerated from scripts)
 personalized_cards/
-wrapped_pages/
+# wrapped_pages/  # Now tracked for Vercel deployment
 
 # Sensitive Data (contains player emails)
 player_data.csv
