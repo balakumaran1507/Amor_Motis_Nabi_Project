@@ -2,32 +2,34 @@
 """
 CTF Card Personalizer v2 - Template Based
 Uses blank template + overlays chibi + adds text
+Updated to use built-in csv module and fix pathing.
 """
 
-import pandas as pd
-from PIL import Image, ImageDraw, ImageFont
+import csv
 import os
+from PIL import Image, ImageDraw, ImageFont
 
 # ============================================
 # CONFIGURATION
 # ============================================
 
-# Input files
-CSV_FILE = "../player_data.csv"  # FULL DATASET - ALL 163 PLAYERS
-TEMPLATE_BG = "../card_bg.png"  # Your blank template (in parent dir)
-CHIBI_FOLDER = "../chibis"  # Folder with 7 transparent chibi PNGs (in parent dir)
+# Use absolute paths or reliable relative paths
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-# Output folder
-OUTPUT_FOLDER = "personalized_cards"
+CSV_FILE = os.path.join(BASE_PATH, "player_data.csv")
+TEMPLATE_BG = os.path.join(BASE_PATH, "card_bg.png")
+CHIBI_FOLDER = os.path.join(BASE_PATH, "chibis")
+OUTPUT_FOLDER = os.path.join(BASE_PATH, "personalized_cards")
 
 # Font file (macOS system font)
-FONT_PATH = "/System/Library/Fonts/Supplemental/Arial.ttf"  # macOS default
+FONT_PATH = "/System/Library/Fonts/Supplemental/Arial.ttf"
+if not os.path.exists(FONT_PATH):
+    FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" # Fallback for linux/others
 
 # ============================================
 # CHIBI MAPPING
 # ============================================
 
-# Map archetype names to chibi filenames
 CHIBI_MAP = {
     "The Hopeless Romantic": "chibi_hopeless_romantic.png",
     "The Player": "chibi_player.png",
@@ -39,32 +41,30 @@ CHIBI_MAP = {
 }
 
 # ============================================
-# TEXT POSITIONS (Adjust these to match your template)
+# TEXT POSITIONS (Adjusted for card_bg.png)
 # ============================================
 
-# Archetype title position (centered, upper third)
-TITLE_POSITION = (540, 280)  # X, Y - centered horizontally
-TITLE_FONT_SIZE = 68
-TITLE_COLOR = (255, 255, 255)  # White
+TITLE_POSITION = (540, 275) 
+TITLE_FONT_SIZE = 64
+TITLE_COLOR = (255, 255, 255)
 
-# Chibi character position (centered, middle)
-CHIBI_POSITION = (540, 600)  # X, Y - centered
-CHIBI_SIZE = (400, 400)  # Width, Height
+CHIBI_POSITION = (500, 600) 
+CHIBI_SIZE = (500, 500)
 
-# Stats text positions (inside the stats box)
-# Your template has stats box at bottom, adjust Y values to match
-STATS_START_Y = 950  # Where first stat line starts
-STATS_LINE_HEIGHT = 60  # Space between each stat line
-STATS_X = 150  # Left margin inside stats box
-STATS_FONT_SIZE = 40
-STATS_COLOR = (255, 255, 255)  # White
+STATS_START_Y = 1140 
+STATS_LINE_HEIGHT = 75
+STATS_X = 185
+STATS_FONT_SIZE = 42
+STATS_COLOR = (176, 176, 176) # Secondary text color
+
+# Background color to hide placeholders
+BG_COLOR = (10, 10, 10) # Dark theme background
 
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
 
 def add_text_centered(draw, text, position, font, color):
-    """Add centered text at position"""
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
@@ -73,177 +73,103 @@ def add_text_centered(draw, text, position, font, color):
     draw.text((x, y), text, font=font, fill=color)
 
 def add_text_left(draw, text, position, font, color):
-    """Add left-aligned text at position"""
     draw.text(position, text, font=font, fill=color)
 
 def personalize_card(player_data, template_path, chibi_folder, output_folder):
-    """
-    Generate personalized card for one player
-    
-    Args:
-        player_data: Dictionary with player info
-        template_path: Path to blank template image
-        chibi_folder: Folder containing chibi PNGs
-        output_folder: Where to save final card
-    
-    Returns:
-        Path to generated card or None if error
-    """
-    
-    # Get player info
     username = str(player_data['Username'])
     archetype = str(player_data['Archetype'])
     solved = str(player_data['Total_Solved'])
-    total = str(player_data['Total_Available'])
+    total = str(player_data.get('Total_Available', '22'))
     rank = str(player_data['Rank'])
     time_display = str(player_data['Time_Display'])
-    category = str(player_data['Fav_Category'])
+    category = str(player_data.get('Fav_Category', 'Generalist'))
     
-    # Load template
     try:
         card = Image.open(template_path).convert('RGBA')
     except FileNotFoundError:
         print(f"  ❌ Template not found: {template_path}")
         return None
     
-    # Load and paste chibi character
+    draw = ImageDraw.Draw(card)
+
+    # 1. Clear placeholders (Draw rectangles over existing text areas)
+    # Archetype area
+    draw.rectangle([200, 240, 880, 310], fill=BG_COLOR)
+    # Chibi area
+    draw.rectangle([320, 420, 680, 810], fill=BG_COLOR)
+    # Stats area
+    draw.rectangle([180, 1140, 600, 1450], fill=BG_COLOR)
+
+    # 2. Paste chibi character
     chibi_filename = CHIBI_MAP.get(archetype)
     if chibi_filename:
         chibi_path = os.path.join(chibi_folder, chibi_filename)
-        try:
+        if os.path.exists(chibi_path):
             chibi = Image.open(chibi_path).convert('RGBA')
-            
-            # Resize chibi to fit
             chibi = chibi.resize(CHIBI_SIZE, Image.Resampling.LANCZOS)
-            
-            # Calculate position to center chibi
             chibi_x = CHIBI_POSITION[0] - CHIBI_SIZE[0] // 2
             chibi_y = CHIBI_POSITION[1] - CHIBI_SIZE[1] // 2
-            
-            # Paste chibi onto card (with transparency)
             card.paste(chibi, (chibi_x, chibi_y), chibi)
-            
-        except FileNotFoundError:
+        else:
             print(f"  ⚠️  Chibi not found: {chibi_path}")
-    else:
-        print(f"  ⚠️  No chibi mapping for archetype: {archetype}")
     
-    # Create drawing context
-    draw = ImageDraw.Draw(card)
-    
-    # Load fonts
+    # 3. Add text
     try:
         title_font = ImageFont.truetype(FONT_PATH, TITLE_FONT_SIZE)
         stats_font = ImageFont.truetype(FONT_PATH, STATS_FONT_SIZE)
     except:
-        print("  ⚠️  Font not found, using default")
         title_font = ImageFont.load_default()
         stats_font = ImageFont.load_default()
     
-    # Add archetype title (centered)
     add_text_centered(draw, archetype.upper(), TITLE_POSITION, title_font, TITLE_COLOR)
     
-    # Add stats (left-aligned in stats box)
     stats_y = STATS_START_Y
-    
-    # Skip "COMBAT STATISTICS" header - already in template
-    stats_y += STATS_LINE_HEIGHT + 20  # Move down past header
-    
-    # Add each stat line
-    add_text_left(draw, f"► SOLVED: {solved}/{total}", 
-                  (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► SOLVED: {solved}/{total}", (STATS_X, stats_y), stats_font, STATS_COLOR)
     stats_y += STATS_LINE_HEIGHT
-    
-    add_text_left(draw, f"► RANK: #{rank}", 
-                  (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► RANK: #{rank}", (STATS_X, stats_y), stats_font, STATS_COLOR)
     stats_y += STATS_LINE_HEIGHT
-    
-    add_text_left(draw, f"► TIME: {time_display}", 
-                  (STATS_X, stats_y), stats_font, STATS_COLOR)
+    add_text_left(draw, f"► TIME: {time_display}", (STATS_X, stats_y), stats_font, STATS_COLOR)
     stats_y += STATS_LINE_HEIGHT
+    add_text_left(draw, f"► FAVORITE: {category}", (STATS_X, stats_y), stats_font, STATS_COLOR)
     
-    add_text_left(draw, f"► FAVORITE: {category}", 
-                  (STATS_X, stats_y), stats_font, STATS_COLOR)
-    
-    # Convert back to RGB for saving as PNG
     card = card.convert('RGB')
-    
-    # Save personalized card
     output_path = os.path.join(output_folder, f"{username}_card.png")
     card.save(output_path, "PNG")
     
-    print(f"  ✓ Generated card for {username} ({archetype})")
     return output_path
 
-# ============================================
-# MAIN FUNCTION
-# ============================================
-
 def main():
-    """Main function to generate all cards"""
-    
     print("=" * 60)
-    print("CTF CARD PERSONALIZER V2 - TEMPLATE BASED")
+    print("CTF CARD PERSONALIZER V2 (FIXED PATHS & OVERLAP)")
     print("=" * 60)
     
-    # Create output folder
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
     
-    # Check template exists
     if not os.path.exists(TEMPLATE_BG):
         print(f"\n❌ ERROR: Template not found: {TEMPLATE_BG}")
-        print("Please place your card_bg.png in this folder.")
         return
     
-    # Check chibi folder exists
-    if not os.path.exists(CHIBI_FOLDER):
-        print(f"\n❌ ERROR: Chibi folder not found: {CHIBI_FOLDER}")
-        print("Please create a 'chibis/' folder with your 7 chibi PNGs.")
-        return
-    
-    # Read player data
-    print(f"\n📊 Reading player data from {CSV_FILE}...")
+    players = []
     try:
-        df = pd.read_csv(CSV_FILE)
-        print(f"  ✓ Found {len(df)} players")
+        with open(CSV_FILE, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                players.append(row)
+        print(f"  ✓ Found {len(players)} players")
     except FileNotFoundError:
         print(f"  ❌ Error: File '{CSV_FILE}' not found!")
         return
     
-    # Generate cards
-    print(f"\n🎨 Generating personalized cards...")
-    print("-" * 60)
-    
     generated_count = 0
-    failed_count = 0
-    
-    for index, row in df.iterrows():
-        player_data = row.to_dict()
-        
-        result = personalize_card(
-            player_data,
-            TEMPLATE_BG,
-            CHIBI_FOLDER,
-            OUTPUT_FOLDER
-        )
-        
+    for player_data in players:
+        result = personalize_card(player_data, TEMPLATE_BG, CHIBI_FOLDER, OUTPUT_FOLDER)
         if result:
             generated_count += 1
-        else:
-            failed_count += 1
+            if generated_count % 20 == 0:
+                print(f"  ...Generated {generated_count} cards")
     
-    # Summary
     print("-" * 60)
-    print(f"\n✅ COMPLETE!")
-    print(f"   Successfully generated: {generated_count} cards")
-    if failed_count > 0:
-        print(f"   Failed: {failed_count} cards")
-    print(f"\n📁 Cards saved to: {OUTPUT_FOLDER}/")
-    print("=" * 60)
-
-# ============================================
-# RUN SCRIPT
-# ============================================
+    print(f"\n✅ COMPLETE! Generated {generated_count} cards")
 
 if __name__ == "__main__":
     main()
