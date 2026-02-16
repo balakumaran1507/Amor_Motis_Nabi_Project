@@ -172,21 +172,46 @@ def personalize_card(player_data):
         # Consistent vertical alignment for labels
         draw.text((table_margin, curr_y + 25), label, font=label_f, fill=DIM_WHITE)
         
-        # Value (Right) - Perfectly sized and aligned
+        # Value (Right) - Intelligent Wrapping & Alignment
         v_font = value_font_base
-        # Precise scaling
-        if len(value) > 20: 
-            v_font = ImageFont.truetype(impact_path, 28) if "Impact" in str(v_font) else get_font(28)
-        elif len(value) > 15:
-            v_font = ImageFont.truetype(impact_path, 34) if "Impact" in str(v_font) else get_font(34)
-            
-        v_bbox = draw.textbbox((0, 0), value, font=v_font)
-        # Perfectly horizontal and vertical alignment
-        value_x = WIDTH - table_margin - (v_bbox[2]-v_bbox[0])
-        # Alignment for Impact font baseline
-        value_y = curr_y + 10 
         
-        draw.text((value_x, value_y), value, font=v_font, fill=WHITE)
+        # Handle long text with splitting (e.g., CORE_SPECIALTY)
+        max_chars = 18
+        if len(value) > max_chars and "-" in value:
+            # Try to split on hyphen for technical names
+            parts = value.split("-")
+            # Reconstruct lines
+            lines = []
+            curr_line = ""
+            for p in parts:
+                if len(curr_line) + len(p) < max_chars:
+                    curr_line += (p + "-" if p != parts[-1] else p)
+                else:
+                    lines.append(curr_line)
+                    curr_line = p + "-" if p != parts[-1] else p
+            if curr_line: lines.append(curr_line)
+            
+            # Smaller font for multi-line
+            v_font = ImageFont.truetype(impact_path, 32) if "Impact" in str(v_font) else get_font(32)
+            
+            # Draw each line
+            v_y = curr_y + 5
+            for line in lines:
+                l_bbox = draw.textbbox((0, 0), line, font=v_font)
+                l_width = l_bbox[2] - l_bbox[0]
+                draw.text((WIDTH - table_margin - l_width, v_y), line, font=v_font, fill=WHITE)
+                v_y += 35
+        else:
+            # Standard single-line logic with scaling
+            if len(value) > 20: 
+                v_font = ImageFont.truetype(impact_path, 28) if "Impact" in str(v_font) else get_font(28)
+            elif len(value) > 15:
+                v_font = ImageFont.truetype(impact_path, 34) if "Impact" in str(v_font) else get_font(34)
+                
+            v_bbox = draw.textbbox((0, 0), value, font=v_font)
+            value_x = WIDTH - table_margin - (v_bbox[2]-v_bbox[0])
+            value_y = curr_y + 10 
+            draw.text((value_x, value_y), value, font=v_font, fill=WHITE)
         
         curr_y += row_height
 
