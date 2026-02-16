@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CTF Card Personalizer v2 - Template Based
+CTF Card Personalizer v2 - Template Based (Optimized for 768x1360 Template)
 Uses blank template + overlays chibi + adds text
-Updated to use built-in csv module and fix pathing.
+Updated to fix coordinates and text doubling for the new Infra template.
 """
 
 import csv
@@ -13,9 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 # CONFIGURATION
 # ============================================
 
-# Use absolute paths or reliable relative paths
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
-
 CSV_FILE = os.path.join(BASE_PATH, "player_data.csv")
 TEMPLATE_BG = os.path.join(BASE_PATH, "chibis", "card bg.png")
 CHIBI_FOLDER = os.path.join(BASE_PATH, "chibis")
@@ -24,7 +22,7 @@ OUTPUT_FOLDER = os.path.join(BASE_PATH, "personalized_cards")
 # Font file (macOS system font)
 FONT_PATH = "/System/Library/Fonts/Supplemental/Arial.ttf"
 if not os.path.exists(FONT_PATH):
-    FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" # Fallback for linux/others
+    FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 # ============================================
 # CHIBI MAPPING
@@ -41,26 +39,26 @@ CHIBI_MAP = {
 }
 
 # ============================================
-# TEXT POSITIONS (Adjusted for card_bg.png)
+# TEXT POSITIONS (Optimized for 768x1360)
 # ============================================
 
-TITLE_POSITION = (540, 275) 
-TITLE_FONT_SIZE = 64
-TITLE_COLOR = (255, 255, 255)
+WIDTH, HEIGHT = 768, 1360
+CENTER_X = WIDTH // 2
 
-CHIBI_POSITION = (500, 600) 
-CHIBI_SIZE = (500, 500)
+TITLE_POSITION = (CENTER_X, 230) 
+TITLE_FONT_SIZE = 52
 
-STATS_START_Y = 1140 
-STATS_LINE_HEIGHT = 75
-STATS_X = 185
-STATS_FONT_SIZE = 42
-STATS_COLOR = (176, 176, 176) # Secondary text color
+CHIBI_POSITION = (CENTER_X, 580) 
+CHIBI_SIZE = (450, 450)
+
+STATS_START_Y = 960 
+STATS_LINE_HEIGHT = 65
+STATS_X = 140
+STATS_FONT_SIZE = 34
 
 # Colors from Infra theme
-BG_COLOR = (10, 10, 10) # Dark theme background
+BG_COLOR = (12, 12, 12) # Dark theme background
 ACCENT_COLOR = (255, 107, 53) # Cyber Orange
-SECONDARY_COLOR = (176, 176, 176) # Secondary text
 WHITE = (255, 255, 255)
 
 # ============================================
@@ -93,24 +91,28 @@ def personalize_card(player_data, template_path, chibi_folder, output_folder):
         print(f"  ❌ Template not found: {template_path}")
         return None
     
+    # Ensure card is 768x1360
+    if card.size != (WIDTH, HEIGHT):
+        card = card.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
+    
     draw = ImageDraw.Draw(card)
 
     # 1. Clear placeholders (Draw rectangles over existing text areas)
-    # Clear "2025" area specifically
-    draw.rectangle([400, 95, 680, 125], fill=BG_COLOR)
+    # Clear "2025" region (Top Right)
+    draw.rectangle([350, 80, 750, 130], fill=BG_COLOR)
     # Archetype area
-    draw.rectangle([200, 150, 880, 320], fill=BG_COLOR)
+    draw.rectangle([100, 180, 680, 280], fill=BG_COLOR)
     # Chibi area
-    draw.rectangle([330, 430, 670, 800], fill=BG_COLOR)
+    draw.rectangle([250, 380, 550, 780], fill=BG_COLOR)
     # Stats area
-    draw.rectangle([180, 1020, 650, 1450], fill=BG_COLOR)
+    draw.rectangle([130, 840, 650, 1300], fill=BG_COLOR)
 
-    # 2. Add technical "2026" text
+    # 2. Add technical "2026" text (Top Right)
     try:
         small_mono = ImageFont.truetype(FONT_PATH, 24)
     except:
         small_mono = ImageFont.load_default()
-    add_text_centered(draw, "CTF WRAPPED 2026", (540, 110), small_mono, ACCENT_COLOR)
+    add_text_left(draw, "CTF WRAPPED 2026", (480, 95), small_mono, ACCENT_COLOR)
 
     # 3. Paste chibi character
     chibi_filename = CHIBI_MAP.get(archetype)
@@ -129,16 +131,17 @@ def personalize_card(player_data, template_path, chibi_folder, output_folder):
     try:
         title_font = ImageFont.truetype(FONT_PATH, TITLE_FONT_SIZE)
         stats_font = ImageFont.truetype(FONT_PATH, STATS_FONT_SIZE)
-        header_font = ImageFont.truetype(FONT_PATH, 32)
+        header_font = ImageFont.truetype(FONT_PATH, 36)
     except:
         title_font = ImageFont.load_default()
         stats_font = ImageFont.load_default()
         header_font = ImageFont.load_default()
     
+    # Archetype Title (Centered)
     add_text_centered(draw, archetype.upper(), TITLE_POSITION, title_font, WHITE)
     
-    # Redraw "COMBAT STATISTICS" header to make it clean
-    add_text_left(draw, "► COMBAT STATISTICS", (STATS_X, STATS_START_Y - 80), header_font, ACCENT_COLOR)
+    # Redraw "COMBAT STATISTICS" header to make it clean (prevent doubling)
+    add_text_left(draw, "► COMBAT STATISTICS", (STATS_X - 10, STATS_START_Y - 80), header_font, ACCENT_COLOR)
 
     stats_y = STATS_START_Y
     add_text_left(draw, f"► SOLVED: {solved}/{total}", (STATS_X, stats_y), stats_font, WHITE)
@@ -157,7 +160,7 @@ def personalize_card(player_data, template_path, chibi_folder, output_folder):
 
 def main():
     print("=" * 60)
-    print("CTF CARD PERSONALIZER V2 (FIXED PATHS & OVERLAP)")
+    print("CTF CARD PERSONALIZER V2 (FINAL REFINEMENT)")
     print("=" * 60)
     
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
