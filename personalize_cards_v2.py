@@ -106,28 +106,44 @@ def personalize_card(player_data):
     s_bbox = draw.textbbox((0, 0), status_text, font=label_font)
     draw.text((WIDTH - margin - 20 - (s_bbox[2]-s_bbox[0]), margin + 20), status_text, font=label_font, fill=ACCENT_COLOR)
 
-    # 5. Operative Name Block
-    name_font = get_font(105)
-    n_bbox = draw.textbbox((0, 0), username, font=name_font)
-    draw.text((CENTER_X - (n_bbox[2]-n_bbox[0])//2, 180), username, font=name_font, fill=WHITE)
+    # Layout Constants
+    table_margin = 100
+
+    # 5. Operative Name Block (DOSSIER STYLING)
+    try:
+        user_font_path = "/System/Library/Fonts/Supplemental/Impact.ttf"
+        name_font = ImageFont.truetype(user_font_path, 110)
+    except:
+        name_font = get_font(105)
+    
+    # Switch to Left Alignment for technical dossier feel
+    draw.text((table_margin, 170), username, font=name_font, fill=WHITE)
     
     context_font = get_font(24)
     c_text = "CYBER_MISSION_RECAP // 2026"
-    c_bbox = draw.textbbox((0, 0), c_text, font=context_font)
-    draw.text((CENTER_X - (c_bbox[2]-c_bbox[0])//2, 305), c_text, font=context_font, fill=ACCENT_COLOR)
+    draw.text((table_margin, 305), c_text, font=context_font, fill=ACCENT_COLOR)
 
-    # 6. Archetype Display
-    arch_font = get_font(52)
-    a_bbox = draw.textbbox((0, 0), archetype, font=arch_font)
-    draw.text((CENTER_X - (a_bbox[2]-a_bbox[0])//2, 420), archetype, font=arch_font, fill=WHITE)
+    # 6. Archetype Display (UPGRADED STYLING)
+    try:
+        title_font_path = "/System/Library/Fonts/Supplemental/Impact.ttf"
+        arch_font = ImageFont.truetype(title_font_path, 82)
+    except:
+        arch_font = get_font(75)
 
-    # 7. Viz Section
-    draw_technical_viz(draw, (180, 530, 440, 320))
+    # Change to Left Alignment with custom spacing
+    draw.text((table_margin, 400), archetype, font=arch_font, fill=WHITE)
+    
+    # Decorative line under the archetype - with increased gap
+    a_bbox = draw.textbbox((table_margin, 400), archetype, font=arch_font)
+    draw.line([(table_margin, a_bbox[3] + 15), (table_margin + 70, a_bbox[3] + 15)], fill=ACCENT_COLOR, width=4)
 
-    # 8. Precise Metric Table
-    table_y = 940
-    table_margin = 100
-    row_height = 95
+    # 7. Viz Section (Repositioned for spacing)
+    viz_y = 580
+    draw_technical_viz(draw, (180, viz_y, 440, 320))
+
+    # 8. Precise Metric Table (MASTER ALIGNMENT)
+    table_y = 1000
+    row_height = 85
     
     section_font = get_font(22)
     draw.text((table_margin, table_y - 50), "► OPERATIONAL_METRICS", font=section_font, fill=ACCENT_COLOR)
@@ -139,26 +155,38 @@ def personalize_card(player_data):
         ("CORE_SPECIALTY", category)
     ]
     
-    label_f = get_font(20)
-    value_f = get_font(42)
+    label_f = get_font(18) # Slightly smaller for more professional look
+    
+    # Try using Impact for values to maintain design consistency
+    try:
+        impact_path = "/System/Library/Fonts/Supplemental/Impact.ttf"
+        value_font_base = ImageFont.truetype(impact_path, 42)
+    except:
+        value_font_base = get_font(42)
     
     curr_y = table_y
     for label, value in metrics:
         # Divider
-        draw.line([(table_margin, curr_y + 85), (WIDTH - table_margin, curr_y + 85)], fill=(45, 45, 45), width=1)
+        draw.line([(table_margin, curr_y + 75), (WIDTH - table_margin, curr_y + 75)], fill=(40, 40, 40), width=1)
         
-        # Label (Left)
-        draw.text((table_margin, curr_y), label, font=label_f, fill=DIM_WHITE)
+        # Consistent vertical alignment for labels
+        draw.text((table_margin, curr_y + 25), label, font=label_f, fill=DIM_WHITE)
         
-        # Value (Right) - with scaling for long strings
-        v_font = value_f
-        if len(value) > 18:
-            v_font = get_font(32)
-        elif len(value) > 14:
-            v_font = get_font(36)
+        # Value (Right) - Perfectly sized and aligned
+        v_font = value_font_base
+        # Precise scaling
+        if len(value) > 20: 
+            v_font = ImageFont.truetype(impact_path, 28) if "Impact" in str(v_font) else get_font(28)
+        elif len(value) > 15:
+            v_font = ImageFont.truetype(impact_path, 34) if "Impact" in str(v_font) else get_font(34)
             
         v_bbox = draw.textbbox((0, 0), value, font=v_font)
-        draw.text((WIDTH - table_margin - (v_bbox[2]-v_bbox[0]), curr_y + 25), value, font=v_font, fill=WHITE)
+        # Perfectly horizontal and vertical alignment
+        value_x = WIDTH - table_margin - (v_bbox[2]-v_bbox[0])
+        # Alignment for Impact font baseline
+        value_y = curr_y + 10 
+        
+        draw.text((value_x, value_y), value, font=v_font, fill=WHITE)
         
         curr_y += row_height
 
