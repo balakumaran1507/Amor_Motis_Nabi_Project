@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CTF Wrapped HTML Generator
+CTF Wrapped HTML Generator - Professional Edition (No Emojis)
 Generates personalized HTML pages for each player using built-in csv module
 """
 
@@ -27,26 +27,13 @@ BASE_URL = "https://cybercom-ctf-wrapped.netlify.app"
 # ============================================
 
 ARCHETYPE_DESCRIPTIONS = {
-    "The Hopeless Romantic": "You approached every challenge with patience and dedication. Like someone who savors every moment of a relationship, you solved puzzles methodically and enjoyed the journey. You value deep connections and meaningful progress over quick wins.",
-    "The Player": "Strategic and efficient, you cherry-picked challenges that gave you the best return on investment. You're the type who knows exactly what they want and goes for it without wasting time. In CTFs and in life, you play to win smartly.",
-    "The Committed One": "You never gave up, even on the hardest challenges. Your persistence and determination are unmatched. Like someone who fights for what they love, you kept pushing through obstacles until you succeeded. You believe in seeing things through to the end.",
-    "The Heartbreaker": "You started strong with impressive early engagement, but then... you vanished. Like someone who ghosts after a few great dates, you left Act 2 behind. Maybe you got busy, maybe you moved on - either way, you left a mark before disappearing.",
-    "The Overthinker": "Every challenge required deep analysis. You considered every angle, used hints thoughtfully, and made sure you understood each step. Like someone who analyzes every text message, you don't rush into solutions - you think them through completely.",
-    "The Chaotic Lover": "Your approach was beautifully unpredictable! You jumped between challenges, categories, and difficulty levels with wild abandon. Like someone who thrives on spontaneity, you brought energetic chaos to your CTF journey. And honestly? It worked for you.",
-    "The Slow Burn": "You started cautiously but built momentum as you went. Your improvement over time was impressive - each challenge made you stronger. Like a relationship that grows deeper with time, you proved that steady growth and patience lead to success."
-}
-
-# Badge emoji mapping
-BADGE_EMOJIS = {
-    "speed_demon": "⚡",
-    "perfect_score": "💯",
-    "The Hopeless Romantic": "💘",
-    "The Player": "🎮",
-    "The Committed One": "🏔️",
-    "The Heartbreaker": "💔",
-    "The Overthinker": "🤔",
-    "The Chaotic Lover": "🌈",
-    "The Slow Burn": "🔥"
+    "The Hopeless Romantic": "You approached every challenge with patience and dedication. Like someone who savors every moment of a mission, you solved puzzles methodically and enjoyed the journey. You value deep tactical connections and meaningful progress over quick wins.",
+    "The Player": "Strategic and efficient, you cherry-picked challenges that gave you the best return on investment. You're the type who knows exactly what they want and goes for it without wasting time. In missions and in the field, you play to win smartly.",
+    "The Committed One": "You never gave up, even on the hardest challenges. Your persistence and determination are unmatched. Like someone who fights for the cause, you kept pushing through obstacles until you succeeded. You believe in seeing things through to the end.",
+    "The Heartbreaker": "You started strong with impressive early engagement, but then... you vanished. Like a high-profile asset that goes dark mid-operation, you left Act 2 behind. Your early impact was significant, but your mission remains incomplete.",
+    "The Overthinker": "Every challenge required deep analysis. You considered every angle, used hints thoughtfully, and made sure you understood each step. You don't rush into solutions - you analyze the data completely before execution.",
+    "The Chaotic Lover": "Your approach was beautifully unpredictable! You jumped between challenges, categories, and difficulty levels with wild abandon. You brought energetic chaos to your operative journey, finding success through sheer tactical spontaneity.",
+    "The Slow Burn": "You started cautiously but built momentum as you went. Your improvement over time was impressive - each challenge made you stronger. You proved that steady growth and tactical patience lead to operational success."
 }
 
 # ============================================
@@ -54,7 +41,7 @@ BADGE_EMOJIS = {
 # ============================================
 
 def generate_badges_html(badges_str, archetype):
-    """Generate HTML for badges section"""
+    """Generate HTML for badges section without emojis"""
     
     if not badges_str or badges_str.strip() == "":
         badges_list = [archetype]
@@ -65,8 +52,9 @@ def generate_badges_html(badges_str, archetype):
     
     html = ""
     for badge in badges_list:
-        emoji = BADGE_EMOJIS.get(badge, "🏅")
-        html += f'<div class="badge-item" title="{badge}">{emoji}</div>\n                '
+        # Using a sleek css-based badge instead of emoji
+        badge_class = badge.lower().replace(" ", "-")
+        html += f'<div class="badge-item badge-{badge_class}" title="{badge}">{badge}</div>\n                '
     
     return html
 
@@ -81,7 +69,7 @@ def generate_html_page(player_data, template_html, cards_folder, output_folder, 
     time_display = str(player_data['Time_Display'])
     category = str(player_data.get('Fav_Category', 'Generalist'))
     
-    description = ARCHETYPE_DESCRIPTIONS.get(archetype, "You have a unique approach to CTF challenges!")
+    description = ARCHETYPE_DESCRIPTIONS.get(archetype, "You have a unique approach to operative challenges!")
     
     card_filename = f"{username}_card.png"
     card_url = f"./cards/{card_filename}"
@@ -97,7 +85,7 @@ def generate_html_page(player_data, template_html, cards_folder, output_folder, 
         # Try searching in wrapped_pages/cards if localized
         alt_card_src = os.path.join(output_folder, "cards", card_filename)
         if not os.path.exists(alt_card_src):
-            print(f"  ⚠️  Warning: Card not found for {username} (Expected at {card_src})")
+            print(f"  ⚠️  Warning: Card not found for {username}")
             card_url = ""
     
     badges_html = generate_badges_html(player_data.get('Badges', ''), archetype)
@@ -127,13 +115,9 @@ def generate_html_page(player_data, template_html, cards_folder, output_folder, 
     
     return output_path
 
-# ============================================
-# MAIN FUNCTION
-# ============================================
-
 def main():
     print("=" * 60)
-    print("CTF WRAPPED HTML GENERATOR (NO PANDAS)")
+    print("CTF WRAPPED HTML GENERATOR (PROFESSIONAL)")
     print("=" * 60)
     
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
