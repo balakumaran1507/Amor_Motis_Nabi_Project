@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-CTF Card Personalizer v4 - ZERO IMAGE EDITION
-Generates Spotify-style wrap cards using 100% code. No background images, no chibis.
-Technical, professional, premium data-driven aesthetic.
+CTF Card Personalizer v5 - MASTER PRECISION EDITION
+Generates Spotify-style wrap cards with 100% pixel-perfect code-only design.
+Fixes all alignment, spacing, and overlap issues.
 """
 
 import csv
@@ -31,12 +31,12 @@ if not os.path.exists(FONT_PATH):
 BG_COLOR = (5, 5, 5)        # Deep Black
 ACCENT_COLOR = (255, 107, 53) # Cyber Orange
 WHITE = (255, 255, 255)
-DIM_WHITE = (140, 140, 140)
-GRID_COLOR = (25, 25, 25)
-BORDER_COLOR = (40, 40, 40)
+DIM_WHITE = (150, 150, 150)
+GRID_COLOR = (30, 30, 30)
+BORDER_COLOR = (50, 50, 50)
 
 # ============================================
-# GENERATION LOGIC
+# PRECISION TOOLS
 # ============================================
 
 def get_font(size):
@@ -45,32 +45,34 @@ def get_font(size):
     except:
         return ImageFont.load_default()
 
-def draw_grid(draw):
-    step_size = 50
-    for x in range(0, WIDTH, step_size):
-        draw.line([(x, 0), (x, HEIGHT)], fill=GRID_COLOR, width=1)
-    for y in range(0, HEIGHT, step_size):
-        draw.line([(0, y), (WIDTH, y)], fill=GRID_COLOR, width=1)
-
-def draw_abstract_data(draw, x, y, width, height):
-    """Draws a professional technical data-visualization looking element"""
-    # Draw a technical frame
-    draw.rectangle([x, y, x + width, y + height], outline=BORDER_COLOR, width=1)
+def draw_technical_viz(draw, rect):
+    """Draws a centered, balanced technical visualization"""
+    rx, ry, rw, rh = rect
+    draw.rectangle([rx, ry, rx+rw, ry+rh], outline=(40, 40, 40), width=1)
     
-    # Draw some 'fake' data bars
-    curr_y = y + 40
-    for _ in range(8):
-        bar_w = random.randint(100, width - 100)
-        draw.rectangle([x + 40, curr_y, x + 40 + bar_w, curr_y + 15], fill=(30, 30, 30))
-        draw.rectangle([x + 40, curr_y, x + 40 + (bar_w // 2), curr_y + 15], fill=ACCENT_COLOR)
+    # Header for viz
+    draw.text((rx + 15, ry + 15), "BIOMETRIC_SIGNATURE", font=get_font(14), fill=DIM_WHITE)
+    
+    # Viz elements
+    bar_margin = 40
+    avail_w = rw - (bar_margin * 2)
+    curr_y = ry + 60
+    for i in range(7):
+        # Background bar
+        draw.rectangle([rx + bar_margin, curr_y, rx + bar_margin + avail_w, curr_y + 12], fill=(25, 25, 25))
+        # Foreground bar (Data)
+        data_w = random.randint(30, avail_w)
+        draw.rectangle([rx + bar_margin, curr_y, rx + bar_margin + data_w, curr_y + 12], fill=ACCENT_COLOR)
         curr_y += 35
-    
-    # Draw some technical corner accents
-    acc = 20
-    draw.line([(x, y), (x + acc, y)], fill=ACCENT_COLOR, width=3)
-    draw.line([(x, y), (x, y + acc)], fill=ACCENT_COLOR, width=3)
-    draw.line([(x + width, y + height), (x + width - acc, y + height)], fill=ACCENT_COLOR, width=3)
-    draw.line([(x + width, y + height), (x + width, y + height - acc)], fill=ACCENT_COLOR, width=3)
+
+    # Corner Accents
+    acc = 25
+    # TL
+    draw.line([(rx-5, ry-5), (rx+acc, ry-5)], fill=ACCENT_COLOR, width=2)
+    draw.line([(rx-5, ry-5), (rx-5, ry+acc)], fill=ACCENT_COLOR, width=2)
+    # BR
+    draw.line([(rx+rw+5, ry+rh+5), (rx+rw+5-acc, ry+rh+5)], fill=ACCENT_COLOR, width=2)
+    draw.line([(rx+rw+5, ry+rh+5), (rx+rw+5, ry+rh+5-acc)], fill=ACCENT_COLOR, width=2)
 
 def personalize_card(player_data):
     username = str(player_data['Username']).upper()
@@ -79,74 +81,95 @@ def personalize_card(player_data):
     total = str(player_data.get('Total_Available', '22'))
     rank = str(player_data['Rank'])
     time_display = str(player_data['Time_Display'])
-    category = str(player_data.get('Fav_Category', 'Generalist'))
+    category = str(player_data.get('Fav_Category', 'Generalist')).upper()
 
-    # 1. Create Base Canvas
+    # 1. Base Canvas
     card = Image.new('RGB', (WIDTH, HEIGHT), color=BG_COLOR)
     draw = ImageDraw.Draw(card)
     
-    # 2. Draw Technical Grid
-    draw_grid(draw)
+    # 2. Tech Grid
+    grid_step = 60
+    for x in range(0, WIDTH, grid_step):
+        draw.line([(x, 0), (x, HEIGHT)], fill=GRID_COLOR, width=1)
+    for y in range(0, HEIGHT, grid_step):
+        draw.line([(0, y), (WIDTH, y)], fill=GRID_COLOR, width=1)
 
-    # 3. Framing & Branding
-    margin = 50
+    # 3. Outer Frame
+    margin = 45
     draw.rectangle([margin, margin, WIDTH-margin, HEIGHT-margin], outline=BORDER_COLOR, width=2)
     
-    # Header Section
-    header_f = get_font(18)
-    draw.text((margin + 25, margin + 25), "OPERATIVE_INTEL_SYSTEM_V4.0", font=header_f, fill=DIM_WHITE)
-    draw.text((WIDTH - margin - 230, margin + 25), "ACCESS_STATUS: ENCRYPTED", font=header_f, fill=ACCENT_COLOR)
+    # 4. Header Labels
+    label_font = get_font(18)
+    draw.text((margin + 20, margin + 20), "INTEL_REPORT_V5.0", font=label_font, fill=DIM_WHITE)
+    
+    status_text = "ACCESS: ENCRYPTED"
+    s_bbox = draw.textbbox((0, 0), status_text, font=label_font)
+    draw.text((WIDTH - margin - 20 - (s_bbox[2]-s_bbox[0]), margin + 20), status_text, font=label_font, fill=ACCENT_COLOR)
 
-    # 4. Main Operative Identifier
-    name_font = get_font(90)
-    bbox = draw.textbbox((0, 0), username, font=name_font)
-    draw.text((CENTER_X - (bbox[2]-bbox[0])//2, 200), username, font=name_font, fill=WHITE)
+    # 5. Operative Name Block
+    name_font = get_font(105)
+    n_bbox = draw.textbbox((0, 0), username, font=name_font)
+    draw.text((CENTER_X - (n_bbox[2]-n_bbox[0])//2, 180), username, font=name_font, fill=WHITE)
     
-    sub_font = get_font(26)
-    draw.text((CENTER_X - 120, 310), "CTF RECAP // 2026", font=sub_font, fill=ACCENT_COLOR)
+    context_font = get_font(24)
+    c_text = "CYBER_MISSION_RECAP // 2026"
+    c_bbox = draw.textbbox((0, 0), c_text, font=context_font)
+    draw.text((CENTER_X - (c_bbox[2]-c_bbox[0])//2, 305), c_text, font=context_font, fill=ACCENT_COLOR)
 
-    # 5. Archetype Analysis Section
-    arch_title_font = get_font(48)
-    bbox = draw.textbbox((0, 0), archetype, font=arch_title_font)
-    draw.text((CENTER_X - (bbox[2]-bbox[0])//2, 420), archetype, font=arch_title_font, fill=WHITE)
-    
-    # Center decorative element (Replacing Chibi)
-    draw_abstract_data(draw, 150, 520, 500, 350)
+    # 6. Archetype Display
+    arch_font = get_font(52)
+    a_bbox = draw.textbbox((0, 0), archetype, font=arch_font)
+    draw.text((CENTER_X - (a_bbox[2]-a_bbox[0])//2, 420), archetype, font=arch_font, fill=WHITE)
 
-    # 6. Performance Metrics Section
-    stats_y = 950
-    box_margin = 100
+    # 7. Viz Section
+    draw_technical_viz(draw, (180, 530, 440, 320))
+
+    # 8. Precise Metric Table
+    table_y = 940
+    table_margin = 100
+    row_height = 95
     
-    # Section Header
-    draw.text((box_margin, stats_y - 60), "► FIELD_PERFORMANCE_METRICS", font=get_font(24), fill=ACCENT_COLOR)
-    
-    metrics_font = get_font(42)
-    label_font = get_font(20)
-    curr_y = stats_y
+    section_font = get_font(22)
+    draw.text((table_margin, table_y - 50), "► OPERATIONAL_METRICS", font=section_font, fill=ACCENT_COLOR)
     
     metrics = [
         ("TARGETS_RESOLVED", f"{solved} / {total}"),
-        ("MISSION_PERCENTILE", f"RANK_{rank}"),
-        ("ACTIVE_OP_TIME", time_display),
-        ("CORE_SPECIALIZATION", category.upper())
+        ("FIELD_PERCENTILE", f"RANK_{rank}"),
+        ("MISSION_DURATION", time_display),
+        ("CORE_SPECIALTY", category)
     ]
-
+    
+    label_f = get_font(20)
+    value_f = get_font(42)
+    
+    curr_y = table_y
     for label, value in metrics:
-        # Draw dotted line divider
-        draw.line([(box_margin, curr_y + 85), (WIDTH - box_margin, curr_y + 85)], fill=(40, 40, 40), width=1)
+        # Divider
+        draw.line([(table_margin, curr_y + 85), (WIDTH - table_margin, curr_y + 85)], fill=(45, 45, 45), width=1)
         
-        draw.text((box_margin, curr_y), label, font=label_font, fill=DIM_WHITE)
-        # Value aligned to right
-        v_bbox = draw.textbbox((0, 0), value, font=metrics_font)
-        draw.text((WIDTH - box_margin - (v_bbox[2]-v_bbox[0]), curr_y + 25), value, font=metrics_font, fill=WHITE)
+        # Label (Left)
+        draw.text((table_margin, curr_y), label, font=label_f, fill=DIM_WHITE)
         
-        curr_y += 110
+        # Value (Right) - with scaling for long strings
+        v_font = value_f
+        if len(value) > 18:
+            v_font = get_font(32)
+        elif len(value) > 14:
+            v_font = get_font(36)
+            
+        v_bbox = draw.textbbox((0, 0), value, font=v_font)
+        draw.text((WIDTH - table_margin - (v_bbox[2]-v_bbox[0]), curr_y + 25), value, font=v_font, fill=WHITE)
+        
+        curr_y += row_height
 
-    # 7. Bottom Verification Code
+    # 9. Master Footer
     footer_f = get_font(18)
-    auth_code = f"AUTH-HEX-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
-    draw.text((margin + 25, HEIGHT - margin - 40), auth_code, font=footer_f, fill=(50, 50, 50))
-    draw.text((WIDTH - margin - 220, HEIGHT - margin - 40), "CYBERCOM_INTEL_REPORT", font=footer_f, fill=(50, 50, 50))
+    serial = f"SERIAL: {random.randint(100000, 999999)}-{random.randint(10, 99)}"
+    draw.text((margin + 20, HEIGHT - margin - 45), serial, font=footer_f, fill=(60, 60, 60))
+    
+    tagline = "CYBER_COMMAND_PROPERTY_2026"
+    t_bbox = draw.textbbox((0, 0), tagline, font=footer_f)
+    draw.text((WIDTH - margin - 20 - (t_bbox[2]-t_bbox[0]), HEIGHT - margin - 45), tagline, font=footer_f, fill=(60, 60, 60))
 
     # Save
     output_path = os.path.join(OUTPUT_FOLDER, f"{player_data['Username']}_card.png")
@@ -155,29 +178,24 @@ def personalize_card(player_data):
 
 def main():
     print("=" * 60)
-    print("CTF WRAPPED CARD GENERATOR - V4 ZERO IMAGE EDITION")
+    print("CTF WRAPPED CARD GENERATOR - V5 MASTER PRECISION")
     print("=" * 60)
     
     os.makedirs(OUTPUT_FOLDER, exist_ok=True)
     
     players = []
-    try:
-        with open(CSV_FILE, mode='r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                players.append(row)
-    except FileNotFoundError:
-        print(f"❌ Error: {CSV_FILE} not found")
-        return
+    with open(CSV_FILE, mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            players.append(row)
     
-    print(f"🚀 Generating {len(players)} images via code only...")
+    print(f"🚀 Generating {len(players)} pixel-perfect reports...")
     for i, player in enumerate(players):
         personalize_card(player)
-        if (i+1) % 20 == 0:
-            print(f"  ...Generated {i+1} records")
+        if (i+1) % 20 == 0: print(f"  ...Produced {i+1} cards")
             
     print("-" * 60)
-    print(f"✅ FINALIZED: 166 Encrypted Operative Reports Delivered.")
+    print(f"✅ FINALIZED: Optimization Complete.")
 
 if __name__ == "__main__":
     main()
